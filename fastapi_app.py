@@ -2,11 +2,17 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 import pdfplumber
 import json
 import io
+import os
 from google import genai
 from google.genai import types  # Import pour la configuration JSON
 
-# Configuration du client
-client = genai.Client(api_key="AIzaSyDS-JIAmSty5ZQVMS-fhChTqpqlsqflqGk")
+# Configuration du client - Utilise une variable d'environnement pour la sécurité !
+# Définis ta clé avec : $env:GEMINI_API_KEY = "ta-clé-ici" dans PowerShell
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    raise ValueError("❌ GEMINI_API_KEY non définie ! Utilise: $env:GEMINI_API_KEY = 'ta-clé'")
+
+client = genai.Client(api_key=api_key)
 
 app = FastAPI()
 
@@ -27,7 +33,7 @@ def analyser_cahier_des_charges(texte: str):
 
     # Nouveau schéma détaillé
     response = client.models.generate_content(
-        model="gemini-2.5-flash",  # ou gemini-1.5-flash
+        model="gemini-1.5-flash",  # Modèle stable et rapide
         contents=prompt,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
